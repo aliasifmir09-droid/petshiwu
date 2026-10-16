@@ -133,20 +133,11 @@ describe('buildHomepageHtml delivery-only schema', () => {
     expect(html).toContain('href="https://www.petshiwu.com/products"');
   });
 
-  it('marks the call center as 24/7', () => {
-    expect(localBusiness.openingHoursSpecification).toEqual([
-      expect.objectContaining({
-        opens: '00:00',
-        closes: '23:59',
-      }),
-    ]);
+  it('does not claim a 24/7 call center', () => {
+    expect(localBusiness.openingHoursSpecification).toBeUndefined();
     const organization = scripts.find((s) => s['@type'] === 'Organization');
-    expect(organization?.contactPoint?.hoursAvailable).toEqual(
-      expect.objectContaining({
-        opens: '00:00',
-        closes: '23:59',
-      })
-    );
+    expect(organization?.contactPoint?.hoursAvailable).toBeUndefined();
+    expect(html).not.toMatch(/24\/7/);
   });
 });
 
@@ -386,7 +377,7 @@ describe('product offer price in first-wave HTML', () => {
     expect(html).toContain('"@type":"Offer"');
     expect(html).toContain('In stock · free ship $49+');
     expect(html).not.toContain('... | Petshiwu');
-    expect(html).toContain('Same-day delivery in NYC for locally stocked items. Arrives in 2-5 business days everywhere else in the US.');
+    expect(html).toContain('Same-day delivery in NYC on locally stocked items. Arrives in 2-5 business days everywhere else in the US.');
     expect(html).toContain('Does not ship to Alaska or Hawaii.');
     expect(html).not.toContain('Not eligible for same-day delivery');
   });
@@ -408,7 +399,7 @@ describe('product offer price in first-wave HTML', () => {
       'durable-rope-tug-toy'
     );
     expect(html).toContain(
-      'Not eligible for same-day delivery - ships nationwide, arrives in 2-5 business days ($7 under $49, free at $49+)'
+      'Not eligible for same-day delivery - ships nationwide, arrives in 2-5 business days ($7 delivery under $49, Free shipping on orders $49+)'
     );
     expect(html).toContain('Does not ship to Alaska or Hawaii');
     expect(html).toContain('"value":"7"');

@@ -8,8 +8,8 @@ describe('TrustBadges', () => {
 
     expect(screen.getByRole('heading', { name: /secure checkout/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /365-day returns/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /free shipping \$49\+/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /nationwide 2-5 business days/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /nyc same-day on local stock/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /free shipping on orders \$49\+/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /nationwide 2-5 day delivery/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /same-day delivery in nyc on locally stocked items/i })).toBeInTheDocument();
   });
 });

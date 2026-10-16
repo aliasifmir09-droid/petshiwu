@@ -13,14 +13,14 @@ const ITEMS = [
   },
   {
     icon: ShieldCheck,
-    title: 'No autoship',
-    text: 'You confirm every order. We never charge in the background.',
+    title: '365-day returns',
+    text: 'Unused items come back. You confirm every order.',
     to: '/our-promise',
     label: 'Our promise',
   },
   {
     icon: HeadphonesIcon,
-    title: 'Call 24/7',
+    title: 'Real human support',
     text: `${CONTACT_PHONE} · PayPal or card · 365-day returns`,
     href: `tel:${CONTACT_PHONE_TEL}`,
     label: 'Talk to a person',

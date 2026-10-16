@@ -207,7 +207,7 @@ describe('TopDawg same-day exclusion on the item page', () => {
     expect(isAlaskaOrHawaiiAddress('CA', '94105')).toBe(false);
     expect(screen.queryByText(/ready to ship/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/eligible for same-day delivery in/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(LOCAL_SAME_DAY_PROMISE)).not.toBeInTheDocument();
+    expect(screen.getAllByText(TOPDAWG_NOT_SAME_DAY_PROMISE).length).toBeGreaterThan(0);
     expect(screen.queryByLabelText(/check delivery by zip code/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/same-day in new york city when you order by cutoff/i)).not.toBeInTheDocument();
   });

@@ -9,9 +9,9 @@ const RawDogFoodNYC = () => {
     <SEOLandingPage
       keyword="raw-dog-food-nyc"
       title="Same-Day Raw Dog Food NYC — Order by 3 PM | Petshiwu"
-      description="Same-day raw dog food delivery in NYC. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Freeze-dried and air-dried. No autoship. Free over $49. All 5 boroughs."
+      description="Same-day raw dog food delivery in NYC. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Freeze-dried and air-dried. Free shipping on orders $49+. All 5 boroughs."
       h1="Same-Day Raw Dog Food Delivery in New York City"
-      introContent="Need raw or raw-inspired dog food tonight in NYC? Order by 3 PM weekdays (1 PM weekends) and we deliver freeze-dried and air-dried formulas before 11 PM. No frozen subway haul. No autoship. Free over $49. All five boroughs."
+      introContent="Need raw or raw-inspired dog food tonight in NYC? Order by 3 PM weekdays (1 PM weekends) and we deliver freeze-dried and air-dried formulas before 11 PM. No frozen subway haul. Free shipping on orders $49+. All five boroughs."
       problemPoints={[
         "Finding raw dog food in NYC requires trips to specialty stores far from home",
         "Carrying heavy frozen raw food packages on the subway or in an Uber",
@@ -46,7 +46,7 @@ const RawDogFoodNYC = () => {
         },
         {
           question: "Can you deliver raw dog food to Brooklyn, Manhattan, and the Bronx?",
-          answer: "Yes — all five boroughs. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. After cutoff, next day. Free over $49. No autoship."
+          answer: "Yes — all five boroughs. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. After cutoff, next day. Free shipping on orders $49+."
         }
       ]}
       searchTerms={['raw dog food', 'freeze dried raw dog food', 'BARF diet', 'raw pet food delivery', 'high protein dog food', 'grain free raw dog food']}

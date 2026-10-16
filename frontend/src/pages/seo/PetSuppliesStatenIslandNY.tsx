@@ -7,9 +7,9 @@ const PetSuppliesStatenIslandNY = () => (
   <SEOLandingPage
     keyword="pet-supplies-staten-island-ny"
     title="Same-Day Pet Supplies Staten Island — Order by 3 PM | Petshiwu"
-    description="Same-day pet delivery on Staten Island. Order by 3 PM weekdays (1 PM weekends), before 11 PM. St. George, Tottenville, New Dorp. No autoship. Free over $49."
+    description="Same-day pet delivery on Staten Island. Order by 3 PM weekdays (1 PM weekends), before 11 PM. St. George, Tottenville, New Dorp. Free shipping on orders $49+."
     h1="Same-Day Pet Supplies Across Staten Island, NY"
-    introContent="Petshiwu delivers pet food tonight across Staten Island — St. George, Tottenville, New Dorp, Stapleton. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. No autoship. Free over $49."
+    introContent="Petshiwu delivers pet food tonight across Staten Island — St. George, Tottenville, New Dorp, Stapleton. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. Free shipping on orders $49+."
     problemPoints={[
       "Limited pet store variety compared to other NYC boroughs",
       "Having to drive to big-box stores for specialty items",

@@ -229,56 +229,56 @@ const removeStaticHero = (html: string): string => {
 
 const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   '/': {
-    title: 'Petshiwu | Pet Food & Supplies – Free Shipping $49+, No Autoship',
-    description: '10,000+ products from Hill\'s, Purina, Blue Buffalo, and Royal Canin. The pet delivery platform and company that ships nationwide — and delivers same-day in NYC. Free shipping over $49. Nationwide delivery in 2-5 business days. No autoship.',
+    title: 'Petshiwu — 10,000+ Pet Products, Ships Nationwide | Same-Day in NYC',
+    description: 'Petshiwu is a nationwide pet delivery company. 10,000+ pet products. Free shipping on orders $49+. $7 delivery under $49. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items.',
   },
   '/products': {
     title: 'Pet food & supplies – Ships nationwide | Petshiwu',
-    description: 'Browse 10,000+ foods, treats, and supplies for dogs, cats, birds, fish, reptiles, and small animals. Top brands. Free shipping over $49.',
+    description: 'Browse 10,000+ foods, treats, and supplies for dogs, cats, birds, fish, reptiles, and small animals. Top brands. Free shipping on orders $49+.',
   },
   '/dog': {
     title: 'Dog food & supplies – Ships nationwide | Petshiwu',
-    description: 'Shop dog food, treats, toys, and accessories. Purina, Blue Buffalo, Royal Canin. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping over $49. No autoship.',
+    description: 'Shop dog food, treats, toys, and accessories. Purina, Blue Buffalo, Royal Canin. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. Free shipping on orders $49+.',
   },
   '/cat': {
     title: 'Cat food & supplies – Ships nationwide | Petshiwu',
-    description: 'Shop cat food, litter, toys, and accessories. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping over $49. No autoship.',
+    description: 'Shop cat food, litter, toys, and accessories. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. Free shipping on orders $49+.',
   },
   '/bird': {
     title: 'Bird Food, Cages & Accessories | Petshiwu',
-    description: 'Shop bird food, cages, perches, and accessories for all bird species. Premium brands. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping over $49.',
+    description: 'Shop bird food, cages, perches, and accessories for all bird species. Premium brands. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. Free shipping on orders $49+.',
   },
   '/fish': {
     title: 'Fish Food, Aquarium Supplies & Tanks | Petshiwu',
-    description: 'Find fish food, filters, aquarium supplies, and tanks for freshwater and saltwater fish. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping over $49.',
+    description: 'Find fish food, filters, aquarium supplies, and tanks for freshwater and saltwater fish. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. Free shipping on orders $49+.',
   },
   '/reptile': {
     title: 'Reptile Food, Terrariums & Supplies | Petshiwu',
-    description: 'Shop reptile food, terrariums, heating, and accessories for snakes, lizards, and turtles. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping over $49.',
+    description: 'Shop reptile food, terrariums, heating, and accessories for snakes, lizards, and turtles. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. Free shipping on orders $49+.',
   },
   '/other-animals': {
     title: 'Other Animal Supplies | Ships nationwide | Petshiwu',
-    description: 'Shop supplies for rabbits, guinea pigs, hamsters, reptiles, birds, fish, and other companion animals. Nationwide delivery in 2-5 business days from Petshiwu. Same-day in NYC on local stock.',
+    description: 'Shop supplies for rabbits, guinea pigs, hamsters, reptiles, birds, fish, and other companion animals. Nationwide delivery in 2-5 business days from Petshiwu. Same-day delivery in NYC on locally stocked items.',
   },
   '/small-animal': {
     title: 'Small Animal Food, Cages & Accessories | Petshiwu',
-    description: 'Shop food, cages, bedding, and toys for hamsters, rabbits, guinea pigs, and more. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping over $49.',
+    description: 'Shop food, cages, bedding, and toys for hamsters, rabbits, guinea pigs, and more. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. Free shipping on orders $49+.',
   },
   '/about': {
     title: 'About Petshiwu — Pet Delivery Platform and Company',
-    description: 'Petshiwu is a pet delivery platform and company. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Warehouse only — not a store. We only deliver.',
+    description: 'Petshiwu is a pet delivery platform and company. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. Warehouse only — not a store. We only deliver.',
   },
   '/our-promise': {
     title: 'Our Promise | Petshiwu',
-    description: 'Fair prices and no autoship. Free shipping over $49. 365-day returns. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.',
+    description: 'Fair prices and no autoship. Free shipping on orders $49+. 365-day returns. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items.',
   },
   '/for-pet-parents': {
     title: 'For Pet Parents | Petshiwu',
-    description: 'Food, treats, and care without a subscription. Shop Hill\'s, Royal Canin, Purina, and more. Free shipping over $49. No autoship.',
+    description: 'Food, treats, and care without a subscription. Shop Hill\'s, Royal Canin, Purina, and more. Free shipping on orders $49+.',
   },
   '/from-queens': {
     title: 'How We Ship | Petshiwu',
-    description: 'Petshiwu is a pet delivery platform and company. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Warehouse only — not a store. We only deliver.',
+    description: 'Petshiwu is a pet delivery platform and company. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. Warehouse only — not a store. We only deliver.',
   },
   '/editorial-standards': {
     title: 'How We Write Pet Care Guides | Petshiwu',
@@ -290,7 +290,7 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/faq': {
     title: 'Frequently Asked Questions | Petshiwu',
-    description: 'Answers to common questions about ordering, shipping, returns, and products at Petshiwu. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.',
+    description: 'Answers to common questions about ordering, shipping, returns, and products at Petshiwu. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items.',
   },
   '/return-policy': {
     title: 'Return & Exchange Policy | Petshiwu',
@@ -314,7 +314,7 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/shipping': {
     title: 'Shipping Policy | Petshiwu',
-    description: 'Same-day NYC for locally stocked items. Nationwide delivery in 2-5 business days. $7 under $49, free at $49. Does not ship to Alaska or Hawaii.',
+    description: 'Same-day NYC for locally stocked items. Nationwide delivery in 2-5 business days. $7 delivery under $49, free at $49. Does not ship to Alaska or Hawaii.',
   },
   '/delivery-zips': {
     title: 'NYC Same-Day Delivery | Petshiwu',
@@ -327,15 +327,15 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   // singular URLs before the botRenderer runs.
   '/fish-tanks': {
     title: 'Aquarium Supplies & Fish Tanks | Petshiwu',
-    description: 'Shop aquariums, filters, and accessories for freshwater and saltwater fish. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping on orders over $49.',
+    description: 'Shop aquariums, filters, and accessories for freshwater and saltwater fish. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. Free shipping on orders $49+.',
   },
   '/search': {
     title: 'Search Products | Petshiwu',
-    description: 'Search 10,000+ pet products for dogs, cats, birds, fish, reptiles, and small animals at Petshiwu. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping over $49.',
+    description: 'Search 10,000+ pet products for dogs, cats, birds, fish, reptiles, and small animals at Petshiwu. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. Free shipping on orders $49+.',
   },
   '/deals': {
     title: "Today's Deals & Pet Supply Discounts | Petshiwu",
-    description: 'Save on premium pet food, treats, toys, and supplies. Daily deals and discounts on top brands for dogs, cats, birds, fish, and more. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.',
+    description: 'Save on premium pet food, treats, toys, and supplies. Daily deals and discounts on top brands for dogs, cats, birds, fish, and more. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items.',
   },
   '/donate': {
     title: 'Donate to Pet Shelters | Petshiwu',
@@ -365,23 +365,23 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
 
   '/high-protein-dog-food-picky-eaters': {
     title: 'Best Dog Food for Picky Eaters — High Protein Picks | Petshiwu',
-    description: 'Find the best dog food for picky eaters. High-protein formulas dogs actually love — Blue Buffalo, Royal Canin, Purina Pro Plan. Free delivery NYC. Free shipping over $49.',
+    description: 'Find the best dog food for picky eaters. High-protein formulas dogs actually love — Blue Buffalo, Royal Canin, Purina Pro Plan. Free delivery NYC. Free shipping on orders $49+.',
   },
   '/best-dog-food-sensitive-stomach-diarrhea': {
     title: 'Best Dog Food for Sensitive Stomach & Diarrhea | Petshiwu',
-    description: 'Vet-recommended dog food for sensitive stomachs. Easy-to-digest formulas that soothe digestive issues. Hill\'s Science Diet, Royal Canin, Purina EN. Free shipping over $49.',
+    description: 'Vet-recommended dog food for sensitive stomachs. Easy-to-digest formulas that soothe digestive issues. Hill\'s Science Diet, Royal Canin, Purina EN. Free shipping on orders $49+.',
   },
   '/durable-dog-toys-aggressive-chewers': {
     title: 'Best Dog Toys for Aggressive Chewers — Extra Durable | Petshiwu',
-    description: 'Heavy-duty dog toys built for aggressive chewers. KONG, Benebone, Nylabone, and more. Free delivery in NYC, free shipping on orders over $49.',
+    description: 'Heavy-duty dog toys built for aggressive chewers. KONG, Benebone, Nylabone, and more. Free delivery in NYC, Free shipping on orders $49+.',
   },
   '/dog-food-delivery-nyc': {
     title: 'Dog Food Delivery NYC — Same-Day & Next-Day | Petshiwu',
-    description: 'Get dog food delivered anywhere in NYC. 1,000+ dog food options from top brands. Serving Queens, Brooklyn, Manhattan, Bronx & Staten Island. Free shipping over $49.',
+    description: 'Get dog food delivered anywhere in NYC. 1,000+ dog food options from top brands. Serving Queens, Brooklyn, Manhattan, Bronx & Staten Island. Free shipping on orders $49+.',
   },
   '/pet-supplies-delivery-nyc': {
     title: 'Same-Day Pet Supplies Delivery NYC — Order by 3 PM | Petshiwu',
-    description: 'Same-day pet supplies delivery in NYC. Order by 3 PM weekdays (1 PM weekends), before 11 PM. No autoship. Free over $49. Dogs, cats, birds, fish, reptiles. All 5 boroughs.',
+    description: 'Same-day pet supplies delivery in NYC. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Free shipping on orders $49+. Dogs, cats, birds, fish, reptiles. All 5 boroughs.',
   },
   '/halloween': {
     title: 'Dog Halloween Costumes & Treats — The Halloween Shop | Petshiwu',
@@ -389,35 +389,35 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/cat-food-delivery-nyc': {
     title: 'Cat Food Delivery NYC — Premium Brands | Petshiwu',
-    description: 'Get premium cat food delivered anywhere in NYC. Wet food, dry food, prescription diets. Royal Canin, Blue Buffalo, Hill\'s Science Diet. Free shipping over $49.',
+    description: 'Get premium cat food delivered anywhere in NYC. Wet food, dry food, prescription diets. Royal Canin, Blue Buffalo, Hill\'s Science Diet. Free shipping on orders $49+.',
   },
   '/cat-litter-delivery-nyc': {
     title: 'Cat Litter Delivery NYC — Clumping, Crystal & Natural | Petshiwu',
-    description: 'Get cat litter delivered anywhere in NYC. Clumping clay, silica crystal, pine, and natural litters from top brands. Free delivery on orders over $49. Queens, Brooklyn, Manhattan & all boroughs.',
+    description: 'Get cat litter delivered anywhere in NYC. Clumping clay, silica crystal, pine, and natural litters from top brands. Free shipping on orders $49+. Queens, Brooklyn, Manhattan & all boroughs.',
   },
   '/cat-treats-delivery-nyc': {
     title: 'Cat Treats Delivery NYC — Freeze-Dried, Crunchy & Soft | Petshiwu',
-    description: 'Get premium cat treats delivered anywhere in NYC. Freeze-dried, soft chews, crunchy, and dental treats. Top brands, fast delivery. Free shipping over $49.',
+    description: 'Get premium cat treats delivered anywhere in NYC. Freeze-dried, soft chews, crunchy, and dental treats. Top brands, fast delivery. Free shipping on orders $49+.',
   },
   '/small-pet-supplies-delivery-nyc': {
     title: 'Small Pet Supplies Delivery NYC — Rabbits, Hamsters, Guinea Pigs | Petshiwu',
-    description: 'Small pet supplies delivered to all NYC boroughs — food, bedding, cages, toys, and accessories for rabbits, hamsters, guinea pigs, and ferrets. Free shipping over $49.',
+    description: 'Small pet supplies delivered to all NYC boroughs — food, bedding, cages, toys, and accessories for rabbits, hamsters, guinea pigs, and ferrets. Free shipping on orders $49+.',
   },
   '/bird-food-delivery-nyc': {
     title: 'Bird Food & Supplies Delivery NYC — All Bird Species | Petshiwu',
-    description: 'Bird food and supplies delivered anywhere in NYC. Seed mixes, pellets, treats, and accessories for parakeets, cockatiels, parrots, and wild birds. Free shipping over $49.',
+    description: 'Bird food and supplies delivered anywhere in NYC. Seed mixes, pellets, treats, and accessories for parakeets, cockatiels, parrots, and wild birds. Free shipping on orders $49+.',
   },
   '/online-pet-store-nyc': {
     title: 'Pet Delivery for NYC — 10,000+ Products | Petshiwu',
-    description: 'NYC pet delivery from our platform with 10,000+ products for dogs, cats, birds, fish & more. Fast delivery across all 5 boroughs. Free shipping on orders over $49.',
+    description: 'NYC pet delivery from our platform with 10,000+ products for dogs, cats, birds, fish & more. Fast delivery across all 5 boroughs. Free shipping on orders $49+.',
   },
   '/affordable-pet-food-nyc': {
     title: 'Affordable Pet Food & Supplies NYC — Free Delivery Over $49 | Petshiwu',
-    description: 'Get quality pet food at great prices delivered in NYC. Premium brands without the premium markup. Free delivery on orders over $49. Queens, Brooklyn, Manhattan, Bronx, Staten Island.',
+    description: 'Get quality pet food at great prices delivered in NYC. Premium brands without the premium markup. Free shipping on orders $49+. Queens, Brooklyn, Manhattan, Bronx, Staten Island.',
   },
   '/raw-dog-food-nyc': {
     title: 'Raw Dog Food NYC — Freeze-Dried & Air-Dried Raw Delivery | Petshiwu',
-    description: 'Raw dog food delivered to all NYC boroughs. Freeze-dried raw, air-dried raw, and raw-inspired formulas. No frozen storage required. Free delivery on orders over $49.',
+    description: 'Raw dog food delivered to all NYC boroughs. Freeze-dried raw, air-dried raw, and raw-inspired formulas. No frozen storage required. Free shipping on orders $49+.',
   },
   '/organic-cat-food-nyc': {
     title: 'Organic Cat Food NYC — Natural & Non-GMO Delivery | Petshiwu',
@@ -475,55 +475,55 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   // ── NYC Borough Landing Pages ─────────────────────────────────────────────
   '/pet-supplies-queens-ny': {
     title: 'Pet Supplies Queens NY — Delivery to Flushing, Astoria, Jackson Heights & All of Queens | Petshiwu',
-    description: "Queens' pet delivery platform, based in Jackson Heights. Fast delivery to Flushing, Astoria, Forest Hills, Jamaica, Bayside & every Queens neighborhood. 10,000+ products, free shipping over $49.",
+    description: "Queens' pet delivery platform, based in Jackson Heights. Fast delivery to Flushing, Astoria, Forest Hills, Jamaica, Bayside & every Queens neighborhood. 10,000+ products, Free shipping on orders $49+.",
   },
   '/pet-supplies-brooklyn-ny': {
     title: 'Pet Supplies Brooklyn NY — Delivery to Williamsburg, Park Slope & All of Brooklyn | Petshiwu',
-    description: "Brooklyn's pet delivery platform. Fast delivery to Williamsburg, Park Slope, Bushwick, Flatbush, Bay Ridge & every Brooklyn neighborhood. 10,000+ products, free shipping over $49.",
+    description: "Brooklyn's pet delivery platform. Fast delivery to Williamsburg, Park Slope, Bushwick, Flatbush, Bay Ridge & every Brooklyn neighborhood. 10,000+ products, Free shipping on orders $49+.",
   },
   '/pet-supplies-manhattan-ny': {
     title: 'Pet Supplies Manhattan NYC — Delivery to Upper West Side, Harlem & All of Manhattan | Petshiwu',
-    description: "Manhattan pet supply delivery. Upper West Side, Upper East Side, Harlem, Hell's Kitchen, Chelsea, Tribeca & more. 10,000+ products, free shipping over $49.",
+    description: "Manhattan pet supply delivery. Upper West Side, Upper East Side, Harlem, Hell's Kitchen, Chelsea, Tribeca & more. 10,000+ products, Free shipping on orders $49+.",
   },
   '/pet-supplies-bronx-ny': {
     title: 'Pet Supplies Bronx NY — Delivery to Fordham, Riverdale, Hunts Point & All of the Bronx | Petshiwu',
-    description: 'Bronx pet supply delivery. Fordham, Riverdale, Hunts Point, Mott Haven, Pelham Bay & more. 10,000+ products from top brands. Free shipping on orders over $49.',
+    description: 'Bronx pet supply delivery. Fordham, Riverdale, Hunts Point, Mott Haven, Pelham Bay & more. 10,000+ products from top brands. Free shipping on orders $49+.',
   },
   '/pet-supplies-staten-island-ny': {
     title: 'Pet Supplies Staten Island NY — Delivery to St. George, Tottenville & All of Staten Island | Petshiwu',
-    description: 'Staten Island pet supply delivery. St. George, Tottenville, New Dorp, Stapleton & all neighborhoods. 10,000+ products from top brands. Free shipping on orders over $49.',
+    description: 'Staten Island pet supply delivery. St. George, Tottenville, New Dorp, Stapleton & all neighborhoods. 10,000+ products from top brands. Free shipping on orders $49+.',
   },
   '/pet-supplies-jackson-heights-ny': {
     title: "Pet Supplies Jackson Heights NY — Local Delivery from Your Neighborhood Delivery Company | Petshiwu",
-    description: "Petshiwu is based in Jackson Heights, Queens. Local pet supply delivery to Jackson Heights, Elmhurst, Woodside & surrounding neighborhoods. 10,000+ products. Free shipping over $49.",
+    description: "Petshiwu is based in Jackson Heights, Queens. Local pet supply delivery to Jackson Heights, Elmhurst, Woodside & surrounding neighborhoods. 10,000+ products. Free shipping on orders $49+.",
   },
   '/pet-supplies-williamsburg-brooklyn-ny': {
     title: "Pet Supplies Williamsburg Brooklyn NY — Same-Day Delivery | Petshiwu",
-    description: "Pet supply delivery to Williamsburg, Brooklyn. Dog food, cat food, pet accessories delivered to North Side, South Side, East Williamsburg & Greenpoint. 10,000+ products, free shipping over $49.",
+    description: "Pet supply delivery to Williamsburg, Brooklyn. Dog food, cat food, pet accessories delivered to North Side, South Side, East Williamsburg & Greenpoint. 10,000+ products, Free shipping on orders $49+.",
   },
   '/pet-supplies-park-slope-brooklyn-ny': {
     title: "Pet Supplies Park Slope Brooklyn NY — Delivery to Your Door | Petshiwu",
-    description: "Pet supply delivery to Park Slope, Brooklyn. Premium dog food, cat food, organic and natural pet products delivered to your Park Slope home. 10,000+ products, free shipping over $49.",
+    description: "Pet supply delivery to Park Slope, Brooklyn. Premium dog food, cat food, organic and natural pet products delivered to your Park Slope home. 10,000+ products, Free shipping on orders $49+.",
   },
   '/pet-supplies-upper-west-side-nyc': {
     title: "Pet Supplies Upper West Side NYC — Delivery to Your Manhattan Apartment | Petshiwu",
-    description: "Pet supply delivery to the Upper West Side, Manhattan. Premium dog food, cat food, and pet accessories delivered to your UWS apartment. 10,000+ products, free shipping over $49.",
+    description: "Pet supply delivery to the Upper West Side, Manhattan. Premium dog food, cat food, and pet accessories delivered to your UWS apartment. 10,000+ products, Free shipping on orders $49+.",
   },
   '/pet-supplies-dumbo-brooklyn-ny': {
     title: "Pet Supplies DUMBO Brooklyn NY — Delivery to Your Apartment | Petshiwu",
-    description: "Pet supply delivery to DUMBO, Brooklyn Heights, and Vinegar Hill. Premium dog food, cat food, and pet accessories delivered fast. 10,000+ products, free shipping over $49.",
+    description: "Pet supply delivery to DUMBO, Brooklyn Heights, and Vinegar Hill. Premium dog food, cat food, and pet accessories delivered fast. 10,000+ products, Free shipping on orders $49+.",
   },
   '/pet-supplies-long-island-city-queens-ny': {
     title: "Pet Supplies Long Island City Queens NY — Fast Delivery | Petshiwu",
-    description: "Pet supply delivery to Long Island City, Queens. Dog food, cat food, and pet supplies delivered to LIC, Hunters Point, Sunnyside & Woodside. 10,000+ products, free shipping over $49.",
+    description: "Pet supply delivery to Long Island City, Queens. Dog food, cat food, and pet supplies delivered to LIC, Hunters Point, Sunnyside & Woodside. 10,000+ products, Free shipping on orders $49+.",
   },
   '/pet-supplies-soho-nyc': {
     title: "Pet Supplies SoHo NYC — Premium Delivery to Your Manhattan Loft | Petshiwu",
-    description: "Pet supply delivery to SoHo, Tribeca, NoHo, and Lower Manhattan. Luxury and premium dog food, cat food, and pet accessories delivered to your SoHo loft. 10,000+ products, free shipping over $49.",
+    description: "Pet supply delivery to SoHo, Tribeca, NoHo, and Lower Manhattan. Luxury and premium dog food, cat food, and pet accessories delivered to your SoHo loft. 10,000+ products, Free shipping on orders $49+.",
   },
   '/pet-supplies-astoria-queens-ny': {
     title: "Pet Supplies Astoria Queens NY — Local Delivery | Petshiwu",
-    description: "Pet supply delivery to Astoria, Queens. Dog food, cat food, and pet accessories delivered to Astoria, Long Island City, Ditmars, and Steinway. Queens-based service. 10,000+ products, free shipping over $49.",
+    description: "Pet supply delivery to Astoria, Queens. Dog food, cat food, and pet accessories delivered to Astoria, Long Island City, Ditmars, and Steinway. Queens-based service. 10,000+ products, Free shipping on orders $49+.",
   },
   ...shopBrandStaticPages(),
 };
@@ -571,7 +571,7 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
 
   const finalMeta = meta ?? {
     title: 'Premium Pet Food & Supplies | Petshiwu',
-    description: 'Shop premium pet food, toys, and supplies for all pets at Petshiwu. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping on orders over $49.',
+    description: 'Shop premium pet food, toys, and supplies for all pets at Petshiwu. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. Free shipping on orders $49+.',
   };
 
   let html = template;
@@ -596,7 +596,7 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
       const productSlug = segments[segments.length - 1];
       h1Text = slugToTitle(productSlug);
     } else {
-      h1Text = 'The pet delivery platform and company that ships nationwide — and delivers same-day in NYC.';
+      h1Text = '10,000+ pet products, shipped nationwide.';
     }
     // For homepage, keep the branded H1 — don't replace it
     if (cleanPath !== '/') {
@@ -1172,8 +1172,8 @@ export const buildProductHtml = (template: string, product: any, slug: string): 
   <hr style="margin:24px 0;border:none;border-top:1px solid #eee" />
   <p style="color:#555;font-size:0.9em">
     ${Array.isArray(product.tags) && product.tags.some((tag: unknown) => String(tag).toLowerCase() === 'topdawg')
-      ? 'Not eligible for same-day delivery - ships nationwide, arrives in 2-5 business days ($7 under $49, free at $49+). Does not ship to Alaska or Hawaii.'
-      : 'Same-day delivery in NYC for locally stocked items. Arrives in 2-5 business days everywhere else in the US. Does not ship to Alaska or Hawaii.'}
+      ? 'Not eligible for same-day delivery - ships nationwide, arrives in 2-5 business days ($7 delivery under $49, Free shipping on orders $49+). Does not ship to Alaska or Hawaii.'
+      : 'Same-day delivery in NYC on locally stocked items. Arrives in 2-5 business days everywhere else in the US. Does not ship to Alaska or Hawaii.'}
     ${petType ? `<a href="${BASE}/${petType}" style="color:#1976d2">Browse more ${petLabel} products</a> &bull;` : ''}
     ${categoryName && categorySlug ? `<a href="${BASE}/${petType}/${categorySlug}" style="color:#1976d2">${esc(categoryName)}</a>` : ''}
     <a href="${BASE}" style="color:#1976d2">Petshiwu — Ships nationwide</a>
@@ -1435,7 +1435,7 @@ export const buildCategoryHtml = (
     ? `${catName} — ${petLabel} Supplies Delivered NYC | Petshiwu`
     : `${catName} | Petshiwu`;
   const description = truncate(
-    category.description ?? `Shop ${catName} for your ${petLabel || 'pet'} at Petshiwu. 340+ products, top brands, free delivery on orders over $49. Serving Queens, Brooklyn, Manhattan & all NYC.`,
+    category.description ?? `Shop ${catName} for your ${petLabel || 'pet'} at Petshiwu. 340+ products, top brands, Free shipping on orders $49+. Serving Queens, Brooklyn, Manhattan & all NYC.`,
     160
   );
 
@@ -1511,7 +1511,7 @@ export const buildPetTypeCollectionHtml = (
   const petSlug = canonicalPetSlug(cleanPath.replace(/^\//, ''));
   const meta = STATIC_PAGES[cleanPath] ?? STATIC_PAGES[`/${petSlug}`] ?? {
     title: 'Pet Supplies | Petshiwu',
-    description: 'Shop pet supplies at Petshiwu. Free shipping over $49.',
+    description: 'Shop pet supplies at Petshiwu. Free shipping on orders $49+.',
   };
   const h1 = meta.title.replace(/\s*\|\s*Petshiwu\s*$/i, '').trim();
   const canonicalUrl = `${BASE}/${petSlug}`;
@@ -1593,7 +1593,7 @@ const buildNeighborhoodHtml = (
   };
   const cat = CATEGORY_LABELS[categorySlug] ?? { label: 'Pet Supplies Delivery', petLabel: 'pet supplies' };
   const title = `${cat.label} in ${neighborhoodName}, ${borough} | Petshiwu`;
-  const description = `Shop premium ${cat.petLabel} and get delivered to ${neighborhoodName}, ${borough}. Free shipping on orders over $49. Queens-based NYC delivery. 10,000+ products.`;
+  const description = `Shop premium ${cat.petLabel} and get delivered to ${neighborhoodName}, ${borough}. Free shipping on orders $49+. Queens-based NYC delivery. 10,000+ products.`;
   const pageUrl = `${BASE}/${slug}`;
   const h1 = `${cat.label} in ${neighborhoodName}, ${borough}`;
 
@@ -1632,7 +1632,6 @@ const buildNeighborhoodHtml = (
       { '@type': 'Neighborhood', name: neighborhoodName },
     ],
     priceRange: '$',
-    openingHours: 'Mo-Su 00:00-24:00',
   };
 
   const injectedTags = `
@@ -1652,7 +1651,7 @@ const buildNeighborhoodHtml = (
     <span>${esc(neighborhoodName)}, ${esc(borough)}</span>
   </nav>
   <h2 style="font-size:1.7em;font-weight:700;margin:0 0 12px">${esc(h1)}</h2>
-  <p style="color:#444;line-height:1.7;margin-bottom:16px">Petshiwu delivers premium ${cat.petLabel} to every address in ${esc(neighborhoodName)}, ${esc(borough)} — including nearby ${esc(nearbyAreas)}. We're Queens-based with 10,000+ products and free shipping on orders over $49.</p>
+  <p style="color:#444;line-height:1.7;margin-bottom:16px">New York City is our home city. The catalog ships nationwide in 2-5 business days. Same-day delivery in NYC on locally stocked items. Free shipping on orders $49+. $7 delivery under $49. Petshiwu delivers premium ${cat.petLabel} to every address in ${esc(neighborhoodName)}, ${esc(borough)} — including nearby ${esc(nearbyAreas)}.</p>
   <a href="${BASE}/products" style="display:inline-block;padding:10px 24px;background:#1976d2;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-bottom:20px">Shop ${esc(cat.petLabel)} →</a>
   <p style="color:#555;font-size:0.9em"><a href="${BASE}/learning" style="color:#1976d2">Pet Care Blog</a> &bull; <a href="${BASE}" style="color:#1976d2">Petshiwu — Ships nationwide</a></p>`;
 
@@ -1754,7 +1753,7 @@ export const buildHomepageHtml = (template: string, products: any[] = []): strin
       width: 512,
       height: 512,
     },
-    description: 'Petshiwu is a pet delivery platform and company. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Warehouse and office only — not a store. We only deliver.',
+    description: 'Petshiwu is a pet delivery platform and company. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. Warehouse and office only — not a store. We only deliver.',
     telephone: '+18002592605',
     email: 'support@petshiwu.com',
     address: {
@@ -1771,12 +1770,6 @@ export const buildHomepageHtml = (template: string, products: any[] = []): strin
       contactType: 'customer service',
       areaServed: 'US',
       availableLanguage: ['English', 'Spanish'],
-      hoursAvailable: {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-        opens: '00:00',
-        closes: '23:59',
-      },
     },
     sameAs: [
       'https://www.facebook.com/1386014131242363',
@@ -1798,7 +1791,7 @@ export const buildHomepageHtml = (template: string, products: any[] = []): strin
     url: BASE,
     image: `${BASE}/og-image.jpg`,
     logo: `${BASE}/logo-square-512.png`,
-    description: 'Nationwide delivery in 2-5 business days. Same-day in New York City for locally stocked items. Jackson Heights is office and warehouse only — not a store. We only deliver.',
+    description: 'Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. Jackson Heights is office and warehouse only — not a store. We only deliver.',
     telephone: '+18002592605',
     email: 'support@petshiwu.com',
     address: {
@@ -1814,14 +1807,6 @@ export const buildHomepageHtml = (template: string, products: any[] = []): strin
       latitude: 40.7489,
       longitude: -73.885,
     },
-    openingHoursSpecification: [
-      {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-        opens: '00:00',
-        closes: '23:59',
-      },
-    ],
     priceRange: '$$',
     currenciesAccepted: 'USD',
     paymentAccepted: 'Credit Card, Debit Card, PayPal',
@@ -1924,7 +1909,7 @@ const buildProductListHtml = async (template: string): Promise<string> => {
 <div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
   <h2>Pet food & supplies – Ships nationwide</h2>
   <p>Browse 10,000+ foods, treats, and supplies for dogs, cats, birds, fish, reptiles, and small animals.
-     Free shipping over $49. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. No autoship.</p>
+     Free shipping on orders $49+. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items.</p>
   ${productLinks
     ? `<ul style="list-style:none;padding:0;columns:2">${productLinks}</ul>`
     : '<p>Browse the catalog on Petshiwu.</p>'}
@@ -2107,7 +2092,7 @@ export const buildSeoLandingHtmlFromProducts = (
   const canonicalUrl = `${BASE}${cleanPath}`;
   const meta = STATIC_PAGES[cleanPath] ?? {
     title: 'Pet Supplies Delivery NYC | Petshiwu',
-    description: 'Same-day pet supplies delivery in NYC. Free shipping over $49.',
+    description: 'Same-day pet supplies delivery in NYC. Free shipping on orders $49+.',
   };
   const h1 = meta.title.replace(/\s*\|\s*Petshiwu\s*$/i, '').trim();
 
@@ -2243,7 +2228,7 @@ export const buildBrandCollectionHtml = (
   <p>${esc(meta.intro)}</p>
   ${productsBlock}
   ${relatedHtml}
-  <p>In stock. Free shipping over $49. No autoship. Nationwide delivery in 2-5 business days.</p>
+  <p>In stock. Free shipping on orders $49+. Nationwide delivery in 2-5 business days.</p>
   <p><a href="${BASE}/brand">All brands</a> · <a href="${BASE}/products">Browse all products</a></p>
 </div>`;
 

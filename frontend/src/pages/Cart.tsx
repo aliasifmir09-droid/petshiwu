@@ -308,7 +308,7 @@ const Cart = () => {
 
   return (
     <>
-            <SEO title="Shopping Cart | petshiwu" description="Your shopping cart at petshiwu. Nationwide delivery in 2-5 business days. Free shipping over $49." noindex={true} />
+            <SEO title="Shopping Cart | petshiwu" description="Your shopping cart at petshiwu. Nationwide delivery in 2-5 business days. Free shipping on orders $49+." noindex={true} />
             <TrustBadges />
             <DeliveryWindowExplainer />
             <div className="container mx-auto px-4 lg:px-8 py-8">

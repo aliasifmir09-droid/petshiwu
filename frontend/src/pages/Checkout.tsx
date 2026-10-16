@@ -942,10 +942,10 @@ const Checkout = () => {
             </h1>
             <p className="mt-2 max-w-xl text-stone-600">
               {ORDERING_PAUSED
-                ? 'Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. PayPal-secured payment and 24/7 support will be ready when we start accepting orders.'
+                ? 'Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. PayPal-secured payment will be ready when we start accepting orders.'
                 : deliverySummary
                   ? deliverySummary
-                  : 'Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.'}
+                  : 'Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items.'}
             </p>
           </div>
           <div className="flex flex-wrap gap-2 text-xs font-semibold text-stone-600">
@@ -1499,10 +1499,10 @@ const Checkout = () => {
                     <ShieldCheck className="w-6 h-6 text-[#1E3A8A] flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="font-bold text-stone-900">A promise worth the brand</p>
-                      <p className="text-sm text-stone-600 mt-1">Same-day Queens, PayPal-secured, and a human on the phone 24/7.</p>
+                      <p className="text-sm text-stone-600 mt-1">Nationwide delivery in 2-5 business days. PayPal-secured checkout.</p>
                       <ul className="mt-3 space-y-1.5 text-sm text-stone-700">
                         <li className="flex items-center gap-2"><RotateCcw className="w-4 h-4 text-[#1E3A8A]" /> 365-day returns on unused items</li>
-                        <li className="flex items-center gap-2"><Headphones className="w-4 h-4 text-[#1E3A8A]" /> Call 24/7 · (800) 259-2605</li>
+                        <li className="flex items-center gap-2"><Headphones className="w-4 h-4 text-[#1E3A8A]" /> Call support · (800) 259-2605</li>
                       </ul>
                     </div>
                   </div>

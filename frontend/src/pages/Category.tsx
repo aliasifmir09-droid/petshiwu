@@ -5,6 +5,7 @@ import { productService } from '@/services/products';
 import { categoryService } from '@/services/categories';
 import ProductCard from '@/components/ProductCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { ProductGridSkeleton } from '@/components/ProductCardSkeleton';
 import Dropdown from '@/components/Dropdown';
 import { SlidersHorizontal, ArrowUpDown, ChevronRight, Home } from 'lucide-react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
@@ -308,7 +309,6 @@ const Category = () => {
         <StructuredData type="breadcrumb" data={seoData.breadcrumbSchema} />
       )}
       <TrustBadges />
-      <DeliveryWindowExplainer />
       <div className="container mx-auto px-4 lg:px-8 py-8">
         {/* Breadcrumbs */}
       <nav className="mb-6" aria-label="Breadcrumb">
@@ -431,9 +431,7 @@ const Category = () => {
             {/* Products */}
             <div className="flex-1">
               {isLoadingProducts ? (
-                <div className="py-12" role="status" aria-label="Loading products">
-                  <LoadingSpinner size="lg" ariaLabel="Loading products" />
-                </div>
+                <ProductGridSkeleton count={8} />
               ) : filteredProducts.length > 0 ? (
                 <>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch">
@@ -506,6 +504,7 @@ const Category = () => {
         </div>
       </div>
     </div>
+    <DeliveryWindowExplainer />
     </>
   );
 };

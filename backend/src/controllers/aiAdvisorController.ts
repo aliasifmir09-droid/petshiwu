@@ -431,12 +431,12 @@ PETSHIWU PLATFORM — COMPLETE KNOWLEDGE BASE
 - Name: Petshiwu | Website: petshiwu.com
 - Address: 37-68 74th Street, Jackson Heights, Queens, NY 11372
 - Phone: +1 (800) 259-2605 | Email: support@petshiwu.com
-- Support hours: 24/7 phone support at +1 (800) 259-2605
+- Support hours: phone or email support at +1 (800) 259-2605
 - 10,000+ products for dogs, cats, birds, fish, reptiles, and small animals
 - Top brands: Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Iams, Pedigree, Nutro
 
 === SHIPPING ===
-- Every US order except Alaska and Hawaii: $7 under $49, free at $49, including NYC and shipped catalog items
+- Every US order except Alaska and Hawaii: $7 delivery under $49, free at $49, including NYC and shipped catalog items
 - NYC (Queens, Brooklyn, Manhattan, Bronx, Staten Island): same-day if ordered by 3 PM weekdays (1 PM weekends), otherwise next day
 - Same-day delivery: all five NYC boroughs — order by 3 PM EST weekdays (1 PM weekends)
 - In-stock products are eligible for same-day delivery in NYC

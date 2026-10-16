@@ -38,7 +38,7 @@ const Contact = () => {
     <>
       <SEO
         title="Contact Us | Petshiwu"
-        description="Contact Petshiwu for NYC pet delivery orders and questions. Jackson Heights is office and warehouse only — not a store. We only deliver."
+        description="Contact Petshiwu. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. Jackson Heights is office and warehouse only — not a store. We only deliver."
         keywords="contact petshiwu, pet delivery nyc contact, jackson heights pet delivery, pet care support"
       />
       <StructuredData
@@ -58,13 +58,8 @@ const Contact = () => {
             postalCode: '11372',
             addressCountry: 'US'
           },
-          openingHoursSpecification: [{
-            dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-            opens: '00:00',
-            closes: '23:59',
-          }],
           priceRange: '$$',
-          description: 'NYC same-day pet supply delivery. Jackson Heights is office and warehouse only — not a store. We only deliver. Contact us for orders, questions, or partnership inquiries.',
+          description: 'Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. Jackson Heights is office and warehouse only — not a store. We only deliver.',
           areaServed: ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'],
           paymentAccepted: 'Cash, Credit Card, Debit Card',
           currenciesAccepted: 'USD',
@@ -87,7 +82,7 @@ const Contact = () => {
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-4">Contact Us</h1>
             <p className="text-blue-100 text-base sm:text-lg max-w-xl mx-auto">
               Questions about your order, a product recommendation, or just want to chat about your pet?
-              Our call center is here 24/7.
+              Call +1 (800) 259-2605 or email support@petshiwu.com.
             </p>
           </div>
         </section>
@@ -100,7 +95,7 @@ const Contact = () => {
               <div>
                 <h2 className="text-xl font-bold text-gray-900 mb-2">Get in Touch</h2>
                 <p className="text-gray-600 text-sm">
-                  Our call center is available 24/7 to answer your questions and help with orders.
+                  Call or email and a person will help with your order.
                   Unused items can be returned within 365 days — see our{' '}
                   <a href="/return-policy" className="text-blue-700 hover:underline font-medium">return policy</a>.
                 </p>
@@ -124,11 +119,11 @@ const Contact = () => {
                     <Phone className="w-5 h-5 text-blue-700" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900 text-sm mb-0.5">Phone — 24/7</p>
+                    <p className="font-semibold text-gray-900 text-sm mb-0.5">Phone</p>
                     <a href="tel:+18002592605" className="text-blue-700 hover:text-blue-800 text-sm font-medium">
                       +1 (800) 259-2605
                     </a>
-                    <p className="text-xs text-gray-500 mt-1">Call anytime. A real person answers day and night.</p>
+                    <p className="text-xs text-gray-500 mt-1">Call or email support.</p>
                     <p className="text-xs text-gray-500 mt-1">Or tap We&apos;ll call you, drop your number, and a person rings you within a minute. Why wait?</p>
                   </div>
                 </div>
@@ -150,9 +145,9 @@ const Contact = () => {
                     <Clock className="w-5 h-5 text-blue-700" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900 text-sm mb-1">Call center hours</p>
-                    <p className="text-sm text-gray-800 font-medium">24/7 — 24 hours a day, 7 days a week</p>
-                    <p className="text-xs text-gray-400 mt-1">A real person answers anytime ({nyTzAbbr})</p>
+                    <p className="font-semibold text-gray-900 text-sm mb-1">Support</p>
+                    <p className="text-sm text-gray-800 font-medium">Call or email. We reply to messages.</p>
+                    <p className="text-xs text-gray-400 mt-1">Phone and email ({nyTzAbbr})</p>
                   </div>
                 </div>
               </div>
@@ -179,7 +174,7 @@ const Contact = () => {
               ) : (
                 <>
                   <h2 className="text-xl font-bold text-gray-900 mb-1">Send Us a Message</h2>
-                  <p className="text-sm text-gray-500 mb-6">Prefer to talk? Call 24/7. We also reply to messages around the clock.</p>
+                  <p className="text-sm text-gray-500 mb-6">Prefer to talk? Call +1 (800) 259-2605. You can also send a message.</p>
 
                   <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="grid sm:grid-cols-2 gap-5">

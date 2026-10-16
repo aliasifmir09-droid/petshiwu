@@ -70,7 +70,7 @@ const Press = () => {
               <div><strong>Products:</strong> 10,000+ SKUs, premium brands including Hill&apos;s, Royal Canin, Purina</div>
               <div><strong>Delivery:</strong> Same-day NYC</div>
               <div><strong>Discount Code:</strong> FREEDOM20 (20% off first order, max $10, no autoship)</div>
-              <div><strong>Phone:</strong> +1 (800) 259-2605 (call center 24/7)</div>
+              <div><strong>Phone:</strong> +1 (800) 259-2605 (call or email support)</div>
             </div>
           </div>
         </section>

@@ -528,7 +528,7 @@ export const sendOrderStatusEmail = async (
             <a href="{{trackUrl}}" style="display:inline-block;background:#1E3A8A;color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:10px;">See live shipping status</a>
           </p>
           <p style="color: #666; font-size: 12px; margin-top: 20px;">
-            Questions? Call (800) 259-2605 — a person answers 24/7.<br>
+            Questions? Call (800) 259-2605 or email support@petshiwu.com.<br>
             The Petshiwu Team
           </p>
         </div>
@@ -1183,7 +1183,7 @@ export const sendWelcomeEmail = async (email: string, firstName: string): Promis
     <div class="badge"><span class="badge-dot"></span> Account Activated</div>
     <span class="hero-emoji">🎉</span>
     <div class="hero-title">Welcome to the<br><span class="grad">Petshiwu Family</span></div>
-    <div class="hero-sub">Your account is live. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.</div>
+    <div class="hero-sub">Your account is live. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items.</div>
     <a href="${siteUrl}/products" class="btn">🛍️ &nbsp;Start Shopping Now</a>
   </div>
 
@@ -1208,7 +1208,7 @@ export const sendWelcomeEmail = async (email: string, firstName: string): Promis
           <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 14px">
             <div style="font-size:22px;margin-bottom:8px">🚚</div>
             <div style="font-size:13px;font-weight:700;color:#cbd5e1;margin-bottom:3px">Free Shipping</div>
-            <div style="font-size:11px;color:#475569;line-height:1.5">On orders $49+. $7 under $49. Nationwide delivery in 2-5 business days.</div>
+            <div style="font-size:11px;color:#475569;line-height:1.5">On orders $49+. $7 delivery under $49. Nationwide delivery in 2-5 business days.</div>
           </div>
         </td>
         <td width="50%" style="padding:5px">
@@ -1280,7 +1280,7 @@ export const sendWelcomeEmail = async (email: string, firstName: string): Promis
 Your account is live. Start shopping thousands of premium pet products at ${siteUrl}/products
 
 Why pet parents love us:
-- Free shipping on orders over $49
+- Free shipping on orders $49+
 - 50+ premium brands (Royal Canin, Wellness, Hill's, Purina & more)
 - AI Pet Advisor for personalized picks
 - 100% secure checkout

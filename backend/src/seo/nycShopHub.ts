@@ -18,7 +18,7 @@ export const NYC_HUB_ZIP_INTRO =
   'NYC same-day: order by 3 PM weekdays or 1 PM weekends, at your door before 11 PM. Nationwide delivery in 2-5 business days.';
 
 export const NYC_HUB_NATIONWIDE_BODY =
-  'Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping over $49. No autoship. Jackson Heights is warehouse and office, not a store. We only deliver.';
+  'Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. Free shipping on orders $49+. Jackson Heights is warehouse and office, not a store. We only deliver.';
 
 export const NYC_HUB_COMPARE_ROWS: Array<{
   label: string;
@@ -40,9 +40,9 @@ export const NYC_HUB_COMPARE_ROWS: Array<{
   },
   {
     label: 'Free delivery',
-    petshiwu: 'Free over $49 ($7 under)',
+    petshiwu: 'Free shipping on orders $49+ ($7 under)',
     manhattanShop: 'Often $100+ or zone fees',
-    national: 'Free over $49, slower',
+    national: 'Free shipping on orders $49+, slower',
   },
   {
     label: 'Autoship',
@@ -72,7 +72,7 @@ export const NYC_HUB_LINKS: Array<{ path: string; title: string; text: string }>
   {
     path: '/pet-supplies-delivery-nyc',
     title: 'Pet supplies delivery NYC',
-    text: '10,000+ SKUs. Free over $49.',
+    text: '10,000+ SKUs. Free shipping on orders $49+.',
   },
   {
     path: '/pet-supplies-queens-ny',

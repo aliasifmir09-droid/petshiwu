@@ -17,7 +17,7 @@ const TonightDeliveryHowItWorks = ({ compact = false }: TonightDeliveryHowItWork
         <Link to="/delivery-zips" className="text-[#1E3A8A] font-semibold hover:underline">
           Check your ZIP
         </Link>
-        . Shipped items go nationwide in 2-5 business days. Free over ${TONIGHT.freeOver}. No autoship.
+        . Shipped items go nationwide in 2-5 business days. Free over ${TONIGHT.freeOver}.
       </p>
     </div>
   );

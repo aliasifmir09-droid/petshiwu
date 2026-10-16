@@ -28,18 +28,18 @@ export const NATIONWIDE_SHIPPING_COST = SHIPPING_COST;
 
 export const NATIONWIDE_WINDOW = 'Arrives in 2-5 business days';
 export const NATIONWIDE_PAGE_PROMISE = 'Arrives in 2-5 business days anywhere in the US except Alaska and Hawaii';
-export const NATIONWIDE_FEE_NOTE = '$7 delivery, free at $49+.';
+export const NATIONWIDE_FEE_NOTE = '$7 delivery under $49. Free shipping on orders $49+.';
 export const TRI_STATE_WINDOW = NATIONWIDE_WINDOW;
 export const TRI_STATE_PAGE_PROMISE = NATIONWIDE_PAGE_PROMISE;
 export const LOCAL_UNAVAILABLE_MESSAGE = 'Not available for this address yet';
-export const SAME_DAY_WINDOW = 'Same-day delivery in NYC';
+export const SAME_DAY_WINDOW = 'Same-day delivery in NYC on locally stocked items';
 
-export const HERO_H1 = 'The pet delivery platform and company that ships nationwide — and delivers same-day in NYC.';
+export const HERO_H1 = '10,000+ pet products, shipped nationwide.';
 export const NATIONWIDE_BRAND_FRAME =
-  'Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.';
+  'Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items.';
 
 export const MIXED_TRISTATE_DELIVERY_SUMMARY =
-  'Items arrive in 2-5 business days. Same-day is only for locally stocked items in NYC.';
+  'Items arrive in 2-5 business days. Same-day delivery in NYC on locally stocked items.';
 
 export const ZONE_FEES: Record<string, { cost: number; freeShippingThreshold: number | null }> = {
   [DELIVERY_ZONE.SAME_DAY_NYC]: { cost: SHIPPING_COST, freeShippingThreshold: FREE_SHIPPING_THRESHOLD },
@@ -96,7 +96,7 @@ export function zoneWindow(zone: DeliveryZoneId): string {
   }
 }
 
-/** One shipping charge for the order. $7 under $49, free at $49, including NYC and TopDawg. */
+/** One shipping charge for the order. $7 delivery under $49, free at $49, including NYC and TopDawg. */
 export function combineDeliveryFees(input: {
   zone: DeliveryZoneId;
   merchandiseSubtotal: number;

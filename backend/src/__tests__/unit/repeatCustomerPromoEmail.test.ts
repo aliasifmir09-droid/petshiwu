@@ -16,7 +16,7 @@ describe('repeat customer thank-you email', () => {
     expect(email.html).toContain('10% off');
     expect(email.html).toContain('max $10');
     expect(email.html).toContain('No subscription');
-    expect(email.html).toContain('No autoship');
+    expect(email.html).not.toContain('No autoship');
     expect(email.html).toContain('#1E3A8A');
     expect(email.html).toContain('https://www.petshiwu.com/logo.png');
     expect(email.html).toContain('/products?coupon=RESTOCK5');
@@ -24,7 +24,7 @@ describe('repeat customer thank-you email', () => {
     expect(email.html).toContain('support@petshiwu.com');
     expect(email.html).toContain('+1 (800) 259-2605');
     expect(email.html).toContain('Packed in Queens');
-    expect(email.html).toContain('For NYC pet parents');
+    expect(email.html).toContain('For pet parents nationwide');
     expect(email.html).toContain('food, litter, and everyday supplies');
     expect(email.text).toContain('RESTOCK5');
   });

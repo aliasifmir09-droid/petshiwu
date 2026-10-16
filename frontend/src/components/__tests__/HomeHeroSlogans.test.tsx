@@ -3,31 +3,27 @@ import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, test } from 'vitest';
 import HomeHeroSlogans from '../HomeHeroSlogans';
 import { HOME_PROMO_TILES, HOME_SLOGAN_SUPPORT } from '@/data/brandStories';
-import { FIRST_ORDER_CODE } from '@/config/publicPromos';
 import { HERO_H1 } from '@/utils/deliveryZones';
 
 describe('HomeHeroSlogans', () => {
-  test('leads with the first-order offer and two campaign tiles', () => {
+  test('leads nationwide with one primary shop button and stocked category tiles', () => {
     render(
       <MemoryRouter>
         <HomeHeroSlogans />
       </MemoryRouter>
     );
 
-    expect(screen.getByText(FIRST_ORDER_CODE)).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(HERO_H1);
     expect(screen.getByText(HOME_SLOGAN_SUPPORT)).toBeInTheDocument();
     expect(screen.getByRole('img', { name: /dog, cat, and macaw/i })).toHaveAttribute(
       'src',
       '/hero-wide-family.jpg'
     );
-    expect(screen.getByRole('link', { name: /shop now/i })).toHaveAttribute('href', '/products');
+    const shop = screen.getByRole('link', { name: /^shop now$/i });
+    expect(shop).toHaveAttribute('href', '/products');
     for (const tile of HOME_PROMO_TILES) {
       expect(screen.getByRole('heading', { name: tile.title })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: new RegExp(tile.label, 'i') })).toHaveAttribute(
-        'href',
-        tile.to
-      );
+      expect(screen.getByRole('link', { name: new RegExp(tile.title, 'i') })).toHaveAttribute('href', tile.to);
     }
     expect(screen.queryByText(/nationwide shipping opens/i)).not.toBeInTheDocument();
   });

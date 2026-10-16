@@ -115,7 +115,7 @@ const Learning = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <SEO
         title={`Learning Center${petTypeLabel}${categoryLabel} | Pet Care Tips & Guides`}
-        description="Pet care guides from Petshiwü — photo explainers plus the full education library on food, training, health, and species care. Free shipping over $49."
+        description="Pet care guides from Petshiwü — photo explainers plus the full education library on food, training, health, and species care. Free shipping on orders $49+."
         url={seoUrl}
         noindex={hasFilteredParams}
       />

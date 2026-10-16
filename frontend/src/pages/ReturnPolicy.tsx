@@ -284,7 +284,7 @@ const ReturnPolicy = () => {
                       <div className="flex items-center gap-3">
                         <Clock className="w-5 h-5 text-blue-600" />
                         <div>
-                          <p className="text-sm font-semibold text-gray-900">Call support 24/7</p>
+                          <p className="text-sm font-semibold text-gray-900">Call support</p>
                           <p className="text-sm text-gray-700">+1 (800) 259-2605 · anytime</p>
                         </div>
                       </div>

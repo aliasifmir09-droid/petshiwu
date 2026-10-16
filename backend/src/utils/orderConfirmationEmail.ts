@@ -125,9 +125,9 @@ export function buildOrderConfirmationEmail(
   const deliveryLine = addressZone === 'UNAVAILABLE'
     ? 'Does not ship to Alaska or Hawaii.'
     : addressZone === 'SAME_DAY_NYC' && hasLocalItems && hasShippedItems
-      ? 'Same-day delivery in NYC for locally stocked items. The rest of your order arrives separately in 2-5 business days.'
+      ? 'Same-day delivery in NYC on locally stocked items. The rest of your order arrives separately in 2-5 business days.'
       : addressZone === 'SAME_DAY_NYC' && hasLocalItems
-        ? 'Same-day delivery in NYC.'
+        ? 'Same-day delivery in NYC on locally stocked items.'
         : 'Arrives in 2-5 business days.';
   const preheader = isCod
     ? `Packing slip for Petshiwu order ${orderNumber}. ${formatUsd(orderData.totalPrice)} is due when your driver arrives.`
@@ -276,7 +276,7 @@ export function buildOrderConfirmationEmail(
                           </div>
                           <div style="margin-top:8px;font-size:13px;font-weight:700;color:${BRAND_NAVY};">
                             <a href="tel:${SUPPORT_PHONE_TEL}" style="color:${BRAND_NAVY};text-decoration:none;">${SUPPORT_PHONE_DISPLAY}</a>
-                            <span style="color:#6B7280;font-weight:600;"> · 24/7</span>
+                            <span style="color:#6B7280;font-weight:600;"> · Call or email</span>
                           </div>
                         </td>
                       </tr>
@@ -438,7 +438,7 @@ export function buildOrderConfirmationEmail(
       ? `You checked out as a guest. Continue with Google at ${origin}/login using the same Gmail, or create a password: ${guestPasswordUrl}`
       : '',
     '',
-    `Call support 24/7: ${SUPPORT_PHONE_DISPLAY}`,
+    `Call support: ${SUPPORT_PHONE_DISPLAY}`,
     'support@petshiwu.com',
     '365-day returns · Ships nationwide · Secure checkout',
   ].filter((line) => line !== '').join('\n');

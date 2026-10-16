@@ -9,9 +9,9 @@ const PetFoodSubscriptionNYC = () => {
     <SEOLandingPage
       keyword="pet-food-subscription-nyc"
       title="Pet Food in NYC Without Autoship — Same-Day Delivery | Petshiwu"
-      description="Pet food in NYC without a lock-in subscription. First order FREEDOM20: 20% off, max $10. Repeat: 10% off, max $10. No autoship required. Same-day if you order by 3 PM weekdays. Free over $49."
+      description="Pet food in NYC without a lock-in subscription. First order FREEDOM20: 20% off, max $10. Repeat: 10% off, max $10. No autoship required. Same-day if you order by 3 PM weekdays. Free shipping on orders $49+."
       h1="NYC Pet Food Delivery — Ask First or Autoship"
-      introContent="You do not need a lock-in subscription to get pet food in NYC. First order: 20% off, max $10. Repeat: 10% off, max $10, no autoship required. Add or change food and treats any time. We never charge unless you pay. Same-day if you order by 3 PM weekdays. Free over $49."
+      introContent="You do not need a lock-in subscription to get pet food in NYC. First order: 20% off, max $10. Repeat: 10% off, max $10, no autoship required. Add or change food and treats any time. We never charge unless you pay. Same-day if you order by 3 PM weekdays. Free shipping on orders $49+."
       problemPoints={[
         "Forgetting to reorder and running out of pet food at the worst time",
         "Subscriptions that lock you in or are hard to cancel",

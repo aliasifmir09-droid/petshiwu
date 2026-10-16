@@ -4,11 +4,11 @@ import { ANNOUNCEMENT_SHIPPING } from '@/utils/deliveryZones'
 
 const MESSAGES = [
   { text: ANNOUNCEMENT_SHIPPING },
-  { text: 'FREEDOM20 — 20% off first order, max $10. No autoship.' },
+  { text: 'FREEDOM20 — 20% off first order, max $10.' },
   { text: '365-day returns on unused items' },
-  { text: 'Repeat orders: 10% off, max $10. No subscription.' },
-  { text: 'PayPal or card · 365-day returns · real human support 24/7' },
-  { text: 'Call support 24/7 — +1 (800) 259-2605' },
+  { text: 'Repeat orders: 10% off, max $10.' },
+  { text: 'Secure checkout with PayPal or card' },
+  { text: 'Call +1 (800) 259-2605 or email support@petshiwu.com' },
 ]
 
 export default function AnnouncementBar() {
@@ -31,7 +31,7 @@ export default function AnnouncementBar() {
 
   return (
     <div
-      className="bg-[#1E3A8A] text-white text-center text-sm font-medium relative flex items-center justify-center py-2 px-10"
+      className="relative flex items-center justify-center bg-[#1E3A8A] px-10 py-2.5 text-center text-[13px] font-normal text-white"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >

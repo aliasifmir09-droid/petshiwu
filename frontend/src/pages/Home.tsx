@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { productService, ProductFilters } from '@/services/products';
 import ProductCard from '@/components/ProductCard';
-import LoadingSpinner from '@/components/LoadingSpinner';
+import { ProductGridSkeleton } from '@/components/ProductCardSkeleton';
 import HeroSlideshow from '@/components/HeroSlideshow';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
@@ -77,7 +77,7 @@ const ProductGrid = ({
         </Link>
       </div>
       {isLoading ? (
-        <LoadingSpinner size="md" />
+        <ProductGridSkeleton count={wide ? 8 : 4} />
       ) : (
         <div className={wide ? 'grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4' : 'grid grid-cols-2 gap-3 md:gap-4'}>
           {products.map((product, index) => (
@@ -113,7 +113,7 @@ const Home = () => {
         title={HOMEPAGE_TITLE}
         description={
           ORDERING_PAUSED
-            ? `${CATALOG_PRODUCT_COUNT_LABEL} pet products from ${CATALOG_BRANDS_SHORT}. ${ORDERING_PAUSED_HEADLINE}. Free shipping over $49. No autoship.`
+            ? `${CATALOG_PRODUCT_COUNT_LABEL} pet products from ${CATALOG_BRANDS_SHORT}. ${ORDERING_PAUSED_HEADLINE}. Free shipping on orders $49+.`
             : HOMEPAGE_DESCRIPTION
         }
       />
@@ -142,7 +142,7 @@ const Home = () => {
               name: 'How much does Petshiwu shipping cost?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Shipping is $7 under $49 and free at $49, anywhere in the US except Alaska and Hawaii. Same-day in NYC for locally stocked items. Everything else arrives in 2-5 business days.'
+                text: 'Shipping is $7 delivery under $49 and free at $49, anywhere in the US except Alaska and Hawaii. Same-day in NYC for locally stocked items. Everything else arrives in 2-5 business days.'
               }
             },
             {
@@ -158,7 +158,7 @@ const Home = () => {
               name: 'Where does Petshiwu deliver right now?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Same-day in New York City. Nationwide delivery in 2-5 business days. The Jackson Heights address is warehouse and office, not a walk-in shop.'
+                text: 'Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. The Jackson Heights address is warehouse and office, not a walk-in shop.'
               }
             },
             {
@@ -174,7 +174,7 @@ const Home = () => {
               name: 'How do I contact Petshiwu customer service?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Call +1 (800) 259-2605 anytime — support is 24/7. You can also email support@petshiwu.com or use the contact form on our /contact page.'
+                text: 'Call +1 (800) 259-2605 anytime — support answers by phone or email. You can also email support@petshiwu.com or use the contact form on our /contact page.'
               }
             }
           ]
@@ -222,7 +222,7 @@ const Home = () => {
             </Link>
           </div>
           {isLoading ? (
-            <LoadingSpinner size="lg" />
+            <ProductGridSkeleton count={8} />
           ) : filteredFeaturedProducts.length === 0 ? (
             <p className="text-slate-500">
               Browse the shop — featured picks from {CATALOG_BRANDS_SHORT} will appear here.
@@ -365,7 +365,7 @@ const Home = () => {
             <h2 className="text-3xl md:text-4xl font-extrabold text-[#1E3A8A] mb-2">
               What you get
             </h2>
-            <p className="text-slate-500">Hill’s, Royal Canin, Purina. No autoship. 365-day returns.</p>
+            <p className="text-slate-500">Hill’s, Royal Canin, Purina. 365-day returns.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
@@ -378,8 +378,8 @@ const Home = () => {
                 text: `${CATALOG_BRANDS_SHORT} — plus prescription diets. Order once or restock when you want. We never charge in the background.`,
               },
               {
-                title: '365-day returns, PayPal, and 24/7 support',
-                text: 'Unused items come back easy. Pay with PayPal or card. Call +1 (800) 259-2605 any time. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.',
+                title: '365-day returns and secure checkout',
+                text: 'Unused items come back easy. Pay with PayPal or card. Call +1 (800) 259-2605 any time. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items.',
               },
             ].map((item) => (
               <div key={item.title} className="bg-white rounded-3xl p-7 border border-[#1E3A8A]/8 shadow-sm hover:shadow-md transition-shadow">
@@ -444,7 +444,7 @@ const NewsletterSection = () => {
               <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-white/60 mb-3">Welcome offer</p>
               <h2 className="text-2xl md:text-3xl font-extrabold mb-3">Save on your next order</h2>
               <p className="text-white/80 mb-8">
-                First order: FREEDOM20 (20% off, max $10). Repeat: 10% off, max $10. No autoship.
+                First order: FREEDOM20 (20% off, max $10). Repeat: 10% off, max $10.
               </p>
               <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onSubmit={handleSubmit}>
                 <input

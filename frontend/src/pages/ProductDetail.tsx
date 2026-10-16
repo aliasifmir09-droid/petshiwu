@@ -27,7 +27,6 @@ import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import ProductVariantPicker from '@/components/ProductVariantPicker';
 import TonightPromiseCard from '@/components/TonightPromiseCard';
 import TrustBadges from '@/components/TrustBadges';
-import DeliveryWindowExplainer from '@/components/DeliveryWindowExplainer';
 import { addToCartLabel, inStockLabel } from '@/config/ordering';
 import { EXCLUDED_SHIPPING_MESSAGE, isNationwideProduct, productDeliveryPromise } from '@/utils/deliveryLane';
 import { DELIVERY_ZONE, NATIONWIDE_FEE_NOTE, resolveDeliveryZone } from '@/utils/deliveryZones';
@@ -667,7 +666,6 @@ const ProductDetail = () => {
         selectedVariant={selectedVariantData}
       />
       <TrustBadges />
-      <DeliveryWindowExplainer />
       <div className="container mx-auto px-4 lg:px-8 py-8 pb-44 lg:pb-8">
       {/* Breadcrumb */}
       <nav className="mb-6" aria-label="Breadcrumb">
@@ -876,9 +874,6 @@ const ProductDetail = () => {
                     <span className="w-3 h-3 bg-green-500 rounded-full"></span>
                     <span className="text-green-700 font-medium">{inStockLabel(true)}</span>
                   </div>
-                  <p className="text-xs text-slate-600 mt-0.5">
-                    Same-day in New York City when you order by cutoff.
-                  </p>
                 </div>
               )
             ) : (
@@ -1021,9 +1016,9 @@ const ProductDetail = () => {
             <div className="flex items-center gap-3">
               <Truck className="text-primary-600" size={24} />
               <div>
-                <p className="font-medium">Free shipping over $49</p>
+                <p className="font-medium">Free shipping on orders $49+</p>
                 <p className="text-sm text-gray-600">
-                  $7 under $49, free at $49+, anywhere in the US except Alaska and Hawaii.
+                  $7 delivery under $49, Free shipping on orders $49+, anywhere in the US except Alaska and Hawaii.
                 </p>
               </div>
             </div>

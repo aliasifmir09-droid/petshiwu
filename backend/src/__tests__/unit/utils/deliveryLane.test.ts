@@ -154,7 +154,7 @@ describe('two delivery lanes', () => {
     expect(california.status).toBe(200);
   });
 
-  test('tri-state local carts are $7 under $49 and free at $49', () => {
+  test('tri-state local carts are $7 delivery under $49 and free at $49', () => {
     const hoboken = quoteCartDelivery({
       state: 'NJ',
       zipCode: '07030',

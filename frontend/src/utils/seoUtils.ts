@@ -79,7 +79,7 @@ export function productSearchDescription(opts: {
     .replace(/\s+/g, ' ')
     .trim();
   const stockPhrase = opts.inStock === false ? 'Check stock.' : 'In stock.';
-  const suffix = ` ${stockPhrase} Free shipping over $49. No autoship.`;
+  const suffix = ` ${stockPhrase} Free shipping on orders $49+. $7 delivery under $49.`;
   const budget = Math.max(80, 160 - suffix.length);
   if (stripped) {
     let body = clipAtWord(stripped, budget);
@@ -416,12 +416,6 @@ export const generateOrganizationSchema = (): object => {
       contactType: 'Customer Service',
       areaServed: 'US',
       availableLanguage: 'English',
-      hoursAvailable: {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-        opens: '00:00',
-        closes: '23:59',
-      },
     },
     address: {
       '@type': 'PostalAddress',

@@ -236,9 +236,6 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
                     <>
                       <p className="text-green-700 font-medium">{inStockLabel(true)}</p>
                       <p className="text-sm font-semibold text-[#1E3A8A]">{deliveryPromise}</p>
-                      <p className="text-xs text-slate-500">
-                        Same-day in New York City when you order by cutoff.
-                      </p>
                     </>
                   )
                 ) : (

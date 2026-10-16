@@ -7,9 +7,9 @@ const PetSuppliesAstoriaNY = () => (
   <SEOLandingPage
     keyword="pet-supplies-astoria-queens-ny"
     title="Pet Supplies Astoria Queens NY — Local Delivery | Petshiwu"
-    description="Pet supply delivery to Astoria, Queens. Dog food, cat food, and pet accessories delivered to Astoria, Long Island City, Ditmars, and Steinway. Queens-based service. 10,000+ products, free shipping over $49."
+    description="Pet supply delivery to Astoria, Queens. Dog food, cat food, and pet accessories delivered to Astoria, Long Island City, Ditmars, and Steinway. Queens-based service. 10,000+ products, Free shipping on orders $49+."
     h1="Pet Supplies Delivered Across Astoria, Queens"
-    introContent="Astoria is one of Queens' most beloved neighborhoods — and its pet owners are passionate. Petshiwu is Queens-based and delivers premium pet food, toys, and supplies throughout Astoria, from Ditmars Boulevard to Steinway Street. Local service, big selection, free delivery on orders over $49."
+    introContent="Astoria is one of Queens' most beloved neighborhoods — and its pet owners are passionate. Petshiwu is Queens-based and delivers premium pet food, toys, and supplies throughout Astoria, from Ditmars Boulevard to Steinway Street. Local service, big selection, Free shipping on orders $49+."
     problemPoints={[
       "Limited specialty pet stores in Astoria with full brand selection",
       "Carrying heavy bags from the N or W train",
@@ -22,13 +22,13 @@ const PetSuppliesAstoriaNY = () => (
       "Delivery to Ditmars, Steinway, Astoria Park area, and all Astoria neighborhoods",
       "10,000+ products from premium and everyday brands",
       "Purina, Blue Buffalo, Royal Canin, Hill's, Iams, and more",
-      "Free delivery on orders over $49",
+      "Free shipping on orders $49+",
       "Dogs, cats, birds, fish, reptiles, and small animals all covered"
     ]}
     faqItems={[
       {
         question: "Do you deliver pet supplies to Astoria, Queens?",
-        answer: "Yes — Petshiwu delivers throughout Astoria including Ditmars, Steinway, Astoria Park, and all surrounding streets. We're Queens-based so Astoria is right in our backyard. Free delivery on orders over $49."
+        answer: "Yes — Petshiwu delivers throughout Astoria including Ditmars, Steinway, Astoria Park, and all surrounding streets. We're Queens-based so Astoria is right in our backyard. Free shipping on orders $49+."
       },
       {
         question: "How fast is pet supply delivery to Astoria?",

@@ -208,7 +208,7 @@ export function lookupZip(input: string, now: Date = new Date()): ZipLookupResul
     area: place || 'the US',
     speed: 'standard',
     headline: 'Arrives in 2-5 business days',
-    detail: '$7 under $49, free at $49+.',
+    detail: '$7 delivery under $49, Free shipping on orders $49+.',
     cutoffPassed: countdown.passed,
   };
 }
@@ -241,7 +241,7 @@ export function isAlaskaOrHawaiiAddress(state?: string, zipCode?: string): boole
 }
 
 /** Shown on an in-stock local product when the shopper's ZIP is in NYC or still unknown. */
-export const SAME_DAY_PRODUCT_ELIGIBILITY = 'Same-day delivery in NYC';
+export const SAME_DAY_PRODUCT_ELIGIBILITY = 'Same-day delivery in NYC on locally stocked items';
 
 export const LAST_ZIP_STORAGE_KEY = 'petshiwu_last_zip';
 export const LAST_ZIP_EVENT = 'petshiwu:zip';

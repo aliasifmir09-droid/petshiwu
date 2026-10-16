@@ -122,7 +122,7 @@ const wrapEmail = ({
                 <img src="${logoUrl}" alt="Petshiwü" width="220" style="display:inline-block;width:220px;height:auto;border:0;">
               </a>
               <div style="margin:18px auto 0;width:56px;height:2px;background:${BRAND_GOLD};font-size:0;line-height:2px;">&nbsp;</div>
-              <div style="margin-top:14px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:${BRAND_GOLD};font-weight:700;">NYC same-day · 24/7</div>
+              <div style="margin-top:14px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:${BRAND_GOLD};font-weight:700;">NYC same-day</div>
             </td>
           </tr>
           <tr>
@@ -199,7 +199,7 @@ const wrapEmail = ({
               </table>
               <div style="font-size:16px;color:#ffffff;font-weight:700;">
                 <a href="tel:+18002592605" style="color:#ffffff;text-decoration:none;">+1 (800) 259-2605</a>
-                <span style="color:${BRAND_GOLD};"> · 24/7</span>
+                <span style="color:${BRAND_GOLD};"></span>
               </div>
               <div style="margin-top:10px;font-size:13px;">
                 <a href="${origin}" style="color:#DBEAFE;text-decoration:none;">www.petshiwu.com</a>

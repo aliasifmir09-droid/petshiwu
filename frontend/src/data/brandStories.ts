@@ -17,32 +17,33 @@ export type BrandStory = {
   ctaLabel: string;
 };
 
-export const HOME_SLOGAN = '20% off first order.';
-export const HOME_SLOGAN_SUPPORT = 'Max $10 · no autoship. Free shipping at $49+. $7 under $49.';
+export const HOME_SLOGAN = 'Ships nationwide.';
+export const HOME_SLOGAN_SUPPORT =
+  'Free shipping on orders $49+. $7 delivery under $49. Same-day delivery in NYC on locally stocked items.';
 export const HOME_HERO_IMAGE = '/hero-side-family.webp';
 export const HOME_HERO_IMAGE_JPG = '/hero-side-family.jpg';
 export const HOME_HERO_IMAGE_WIDE = '/hero-wide-family.webp';
 export const HOME_HERO_IMAGE_WIDE_JPG = '/hero-wide-family.jpg';
 export const NATIONWIDE_SOON_NOTE =
-  'Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.';
+  'Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items.';
 export const HOME_OFFER_STRIP =
-  'FREEDOM20 · 20% off first order, max $10 · No autoship · Free shipping over $49';
+  'FREEDOM20 · 20% off first order, max $10 · Free shipping on orders $49+';
 
 export const HOME_PROMO_TILES = [
   {
-    title: 'Same-day NYC',
-    text: 'Order by cutoff. At the door tonight.',
-    to: '/products',
-    label: 'Shop same-day',
+    title: 'Dog food',
+    text: 'Everyday bowls, stocked and ready to ship.',
+    to: '/dog',
+    label: 'Shop dogs',
     image: '/hero-wide-delivery.webp',
     imageJpg: '/hero-wide-delivery.jpg',
     imageAlt: 'Dog and cat at the door with a Petshiwü delivery',
   },
   {
-    title: '365-day returns',
-    text: 'PayPal or card. Call 24/7.',
-    to: '/our-promise',
-    label: 'See our promise',
+    title: 'Cat care',
+    text: 'Food, litter, and treats in one delivery.',
+    to: '/cat',
+    label: 'Shop cats',
     image: '/hero-wide-play.webp',
     imageJpg: '/hero-wide-play.jpg',
     imageAlt: 'Puppy, kitten, and small pets with Petshiwü toys',
@@ -50,11 +51,11 @@ export const HOME_PROMO_TILES = [
 ] as const;
 
 export const NATIONWIDE_CHIPS = [
-  'Free over $49',
-  'No autoship',
+  'Free shipping on orders $49+',
+  '$7 delivery under $49',
   '365-day returns',
-  'PayPal checkout',
-  '24/7 support',
+  'Secure checkout',
+  'Nationwide 2-5 day delivery',
 ];
 
 export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
@@ -62,12 +63,12 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
     slug: 'our-promise',
     path: '/our-promise',
     kicker: 'Our promise',
-    slogan: 'Fair prices. Fast delivery. No autoship.',
+    slogan: 'Fair prices. Fast delivery.',
     title: 'Our Promise | Petshiwu',
     description:
-      'Petshiwu is a pet delivery platform and company. Free shipping over $49. No autoship. 365-day returns. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.',
+      'Petshiwu is a pet delivery platform and company. Free shipping on orders $49+. 365-day returns. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items.',
     intro:
-      'Shop the brands you already buy, at a fair price, without a subscription. Free shipping over $49. Unused items come back for 365 days. Same-day in NYC for locally stocked items, and nationwide delivery in 2-5 business days.',
+      'Shop the brands you already buy, at a fair price, without a subscription. Free shipping on orders $49+. Unused items come back for 365 days. Same-day in NYC for locally stocked items, and nationwide delivery in 2-5 business days.',
     image: '/hero-side-family.webp',
     imageJpg: '/hero-side-family.jpg',
     imageWide: '/hero-wide-family.webp',
@@ -96,7 +97,7 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
     slogan: 'Food, treats, and care — without a subscription.',
     title: 'For Pet Parents | Petshiwu',
     description:
-      'Petshiwu is for pet parents who want vet-quality food and supplies at the door — without a subscription lock-in. Free shipping over $49. No autoship.',
+      'Petshiwu is for pet parents who want vet-quality food and supplies at the door — without a subscription lock-in. Free shipping on orders $49+.',
     intro:
       'You already remember breakfast, dinner, and the late-night water bowl. We remember the bag, the litter, and the chew that lasts past Tuesday. Order by pet, by brand, and by what they eat every day.',
     image: '/hero-side-play.webp',
@@ -127,9 +128,9 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
     slogan: 'A delivery platform and company. We bring it to your door.',
     title: 'How We Ship | Petshiwu',
     description:
-      'Petshiwu is a pet delivery platform and company. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Office and warehouse only — not a store. We only deliver. Free shipping over $49. No autoship.',
+      'Petshiwu is a pet delivery platform and company. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. Office and warehouse only — not a store. We only deliver. Free shipping on orders $49+.',
     intro:
-      'Every order is packed at our warehouse and sent to your door. Same-day in NYC for locally stocked items, and 2-5 business days nationwide — same brands, same 24/7 phone line, same 365-day returns.',
+      'Every order is packed at our warehouse and sent to your door. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. Same 365-day returns.',
     image: '/hero-side-delivery.webp',
     imageJpg: '/hero-side-delivery.jpg',
     imageWide: '/hero-wide-delivery.webp',
@@ -142,7 +143,7 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
       },
       {
         heading: 'Same-day NYC and nationwide delivery',
-        body: 'Same-day in the five boroughs when you order by cutoff (3 PM weekdays, 1 PM weekends), for locally stocked items only. The whole catalog arrives in 2-5 business days anywhere in the US except Alaska and Hawaii. Shipping is $7 under $49 and free at $49.',
+        body: 'Nationwide delivery in 2-5 business days anywhere in the US except Alaska and Hawaii. Same-day delivery in NYC on locally stocked items when you order by cutoff (3 PM weekdays, 1 PM weekends). Free shipping on orders $49+. $7 delivery under $49.',
       },
       {
         heading: 'One standard, every order',
