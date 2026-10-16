@@ -10,6 +10,9 @@ interface AddressComponents {
 
 interface UseGooglePlacesAutocompleteOptions {
   onAddressSelect: (address: AddressComponents) => void;
+  /** Set false while the Google Maps API key is unset/invalid: keeps the street
+   *  input a plain field instead of firing the broken Places dialog. */
+  enabled?: boolean;
 }
 
 const loadGoogleMapsScript = (): Promise<void> => {
@@ -76,13 +79,19 @@ const parseAddressComponents = (
 };
 
 export const useGooglePlacesAutocomplete = (
-  { onAddressSelect }: UseGooglePlacesAutocompleteOptions
+  { onAddressSelect, enabled = true }: UseGooglePlacesAutocompleteOptions
 ) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
   useEffect(() => {
     let isMounted = true;
+
+    // No-op when disabled: with an unset/invalid Google Maps API key, loading the
+    // Places script makes Google render "This page can't load Google Maps correctly"
+    // over the checkout. Gate here so the street input stays a plain input until
+    // the key is fixed, without unmounting or restructuring the form.
+    if (!enabled) return;
 
     loadGoogleMapsScript()
       .then(() => {

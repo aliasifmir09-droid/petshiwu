@@ -268,6 +268,10 @@ const Checkout = () => {
     !isDeliverableShippingAddress(shippingInfo.state, shippingInfo.zipCode);
 
   const { inputRef: streetInputRef } = useGooglePlacesAutocomplete({
+    // Google Maps API key not set up yet — the Places script was throwing
+    // "This page can't load Google Maps correctly" over checkout. Plain input
+    // until the key is fixed; flip this to true (or remove) to re-enable.
+    enabled: false,
     onAddressSelect: (address) => {
       setShippingInfo(prev => ({
         ...prev,
@@ -1123,11 +1127,10 @@ const Checkout = () => {
                     <div>
                       <label className="block text-sm font-medium mb-2">
                         Street Address *
-                        <span className="ml-2 text-xs text-primary-600 font-normal">🔍 Start typing for autocomplete</span>
                       </label>
                       <input ref={streetInputRef} type="text" required value={shippingInfo.street}
                         onChange={(e) => setShippingInfo({ ...shippingInfo, street: e.target.value })}
-                        placeholder="Start typing your address..." autoComplete="off"
+                        placeholder="Enter your street address" autoComplete="street-address"
                         className={fieldClass} />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
