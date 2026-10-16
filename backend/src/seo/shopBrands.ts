@@ -153,18 +153,6 @@ export const SHOP_BRANDS: ShopBrand[] = [
     relatedSlugs: ['friskies', 'purina-cat-chow'],
   },
   {
-    slug: 'simply-nourish',
-    name: 'Simply Nourish',
-    query: 'Simply Nourish',
-    h1: 'Shop Simply Nourish',
-    title: shopBrandTitle('Simply Nourish'),
-    description: shopBrandDescription('Simply Nourish', 'Limited-ingredient recipes for dogs and cats.'),
-    intro:
-      'Simply Nourish limited-ingredient and wholesome recipes for dogs and cats. In stock. Same-day NYC. Nationwide delivery in 2-5 business days.',
-    homeStrip: true,
-    footer: true,
-  },
-  {
     slug: 'wellness',
     name: 'Wellness',
     query: 'Wellness',
