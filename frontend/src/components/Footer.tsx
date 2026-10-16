@@ -31,7 +31,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-[#0B1F4A] text-white">
+    <footer className="bg-[#0B1F4A] text-white" data-home-section="footer">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-8">
 
@@ -126,7 +126,10 @@ const Footer = () => {
 
           {/* Popular pages */}
           <div>
-            <h3 className="text-sm font-medium tracking-wide uppercase text-white mb-4">Our home city</h3>
+            <h3 className="text-sm font-bold tracking-wide uppercase text-white mb-4">
+              <span className="mb-2 block h-0.5 w-8 bg-brand-orange" aria-hidden />
+              Our home city
+            </h3>
             <ul className="space-y-2 text-sm text-blue-100">
               <li><Link to="/delivery-zips" className="hover:text-white transition-colors">NYC delivery area</Link></li>
               <li><Link to="/learning/next-day-pet-delivery-within-50-miles-of-queens" className="hover:text-white transition-colors">Same-day delivery in NYC on locally stocked items</Link></li>
@@ -184,7 +187,7 @@ const Footer = () => {
                 <button
                   type="submit"
                   disabled={newsletterStatus === 'loading'}
-                  className="bg-white px-4 py-2 rounded text-sm text-[#1E3A8A] font-semibold hover:bg-slate-100 transition-colors shrink-0 disabled:opacity-60"
+                  className="shrink-0 rounded bg-brand-orange px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-brand-orange-dark disabled:opacity-60"
                 >
                   {newsletterStatus === 'loading' ? '...' : 'Subscribe'}
                 </button>

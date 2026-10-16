@@ -118,7 +118,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
       to={generateProductUrl(product)}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
-      className="group relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white transition-colors duration-200 hover:border-stone-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A8A] focus-visible:ring-offset-2"
+      className="group relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A8A] focus-visible:ring-offset-2"
     >
       {/* Trending Badge - Top Right Corner */}
       {product.totalReviews > 50 && (
@@ -238,7 +238,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
           </div>
 
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-base font-medium tracking-tight text-stone-900">
+            <span className="text-lg font-extrabold tracking-tight text-[#1E3A8A]">
               ${listingPrice.toFixed(2)}
             </span>
             {compareAtPrice ? (
@@ -281,12 +281,12 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
               onClick={handleAddToCart}
               disabled={!product.inStock}
               aria-label={product.inStock ? `${addToCartLabel(true)} ${product.name}` : `${product.name} is out of stock`}
-              className={`btn w-full gap-2 px-3 ${
+              className={`inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-bold shadow-sm ${
                 cartAdded
                   ? 'bg-emerald-600 text-white'
                   : product.inStock
-                  ? 'bg-[#1E3A8A] text-white hover:bg-[#163074]'
-                  : 'bg-stone-200 text-stone-400 cursor-not-allowed'
+                  ? 'bg-[#F59E0B] text-white hover:bg-[#D97706]'
+                  : 'cursor-not-allowed bg-stone-200 text-stone-400'
               }`}
             >
               {cartAdded ? (

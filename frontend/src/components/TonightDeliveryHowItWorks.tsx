@@ -9,7 +9,8 @@ interface TonightDeliveryHowItWorksProps {
 const TonightDeliveryHowItWorks = ({ compact = false }: TonightDeliveryHowItWorksProps) => {
   const heading = (
     <div className={`max-w-3xl ${compact ? '' : 'mx-auto text-center'} mb-8`}>
-      <h2 id="tonight-how-heading" className="text-2xl md:text-3xl font-bold text-[#1E3A8A] mb-2">
+      <p className="mb-2 text-xs font-bold uppercase tracking-wide text-brand-orange">Shipping</p>
+      <h2 id="tonight-how-heading" className="mb-2 text-2xl font-extrabold text-[#1E3A8A] md:text-3xl">
         How shipping works
       </h2>
       <p className="text-slate-600">
@@ -46,7 +47,7 @@ const TonightDeliveryHowItWorks = ({ compact = false }: TonightDeliveryHowItWork
   }
 
   return (
-    <section className="py-12 bg-slate-50" aria-labelledby="tonight-how-heading">
+    <section className="bg-[#FAF6EF] py-12" aria-labelledby="tonight-how-heading">
       <div className="container mx-auto px-4 lg:px-8">
         {heading}
         {steps}

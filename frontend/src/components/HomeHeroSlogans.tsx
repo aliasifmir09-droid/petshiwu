@@ -11,24 +11,26 @@ import { HERO_H1 } from '@/utils/deliveryZones';
 
 const HomeHeroSlogans = () => {
   return (
-    <section className="bg-[#F7F6F3] border-b border-stone-200">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-16">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+    <section
+      className="border-b border-orange-100 bg-gradient-to-b from-[#FFF4E0] via-[#FAF6EF] to-white"
+      data-home-section="hero"
+    >
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+        <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-16">
           <div className="max-w-xl">
-            <p className="text-xs font-medium tracking-[0.16em] uppercase text-stone-500">
-              Nationwide pet delivery
-            </p>
-            <h1 className="mt-3 text-[1.65rem] sm:text-[2rem] font-medium leading-[1.2] tracking-[-0.02em] text-stone-900">
-              {HERO_H1}
-            </h1>
-            <p className="mt-4 text-[0.9375rem] leading-relaxed text-stone-600">{HOME_SLOGAN_SUPPORT}</p>
-            <div className="mt-7">
-              <Link to="/products" className="btn btn-primary">
+            <p className="text-xs font-bold uppercase tracking-wide text-brand-orange">Nationwide pet delivery</p>
+            <h1 className="mt-3 text-4xl font-extrabold leading-[1.08] text-[#1E3A8A] md:text-5xl">{HERO_H1}</h1>
+            <p className="mt-4 text-base leading-relaxed text-slate-700">{HOME_SLOGAN_SUPPORT}</p>
+            <div className="mt-8">
+              <Link
+                to="/products"
+                className="inline-flex items-center justify-center rounded-full bg-brand-orange px-8 py-3.5 font-bold text-white shadow-md hover:bg-brand-orange-dark"
+              >
                 Shop now
               </Link>
             </div>
           </div>
-          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-stone-200">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-slate-200 shadow-md">
             <picture>
               <source media="(min-width: 768px)" srcSet={HOME_HERO_IMAGE} type="image/webp" />
               <source media="(min-width: 768px)" srcSet={HOME_HERO_IMAGE_JPG} />
@@ -42,12 +44,12 @@ const HomeHeroSlogans = () => {
           </div>
         </div>
 
-        <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4">
+        <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-4">
           {HOME_PROMO_TILES.map((tile) => (
             <Link
               key={tile.title}
               to={tile.to}
-              className="group relative min-h-[140px] overflow-hidden rounded-2xl bg-stone-200 sm:min-h-[180px]"
+              className="group relative min-h-[148px] overflow-hidden rounded-2xl bg-slate-200 shadow-sm sm:min-h-[200px]"
             >
               <picture>
                 <source srcSet={tile.image} type="image/webp" />
@@ -57,10 +59,10 @@ const HomeHeroSlogans = () => {
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                 />
               </picture>
-              <div className="absolute inset-0 bg-gradient-to-t from-stone-950/70 via-stone-950/10 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 text-white">
-                <h2 className="text-base font-medium sm:text-lg">{tile.title}</h2>
-                <p className="mt-1 text-xs text-white/85 sm:text-sm">{tile.text}</p>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1E3A8A]/85 via-[#1E3A8A]/25 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-4 text-white sm:p-5">
+                <h2 className="text-base font-bold sm:text-lg">{tile.title}</h2>
+                <p className="mt-1 text-xs text-white/90 sm:text-sm">{tile.text}</p>
               </div>
             </Link>
           ))}

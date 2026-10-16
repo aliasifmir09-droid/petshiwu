@@ -9,9 +9,9 @@ const NycHubLinkGrid = ({ excludePath }: NycHubLinkGridProps) => {
   const links = NYC_HUB_LINKS.filter((item) => item.path !== excludePath);
 
   return (
-    <section className="py-12" aria-labelledby="nyc-hub-links-heading">
+    <section className="bg-white py-12" aria-labelledby="nyc-hub-links-heading">
       <div className={excludePath ? '' : 'container mx-auto px-4 lg:px-8'}>
-        <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 mb-2">
+        <p className="mb-2 text-xs font-bold uppercase tracking-wide text-brand-orange">
           Delivery
         </p>
         <h2 id="nyc-hub-links-heading" className="text-2xl md:text-3xl font-bold text-[#1E3A8A] mb-2">

@@ -181,7 +181,7 @@ const TonightPromiseCard = ({ variant = 'hero', shopHref = '/products' }: Tonigh
   }
 
   return (
-    <section className="bg-white border-y border-slate-100">
+    <section className="border-y border-orange-100 bg-[#FAF6EF]">
       <div className="container mx-auto px-4 lg:px-8 py-10 md:py-12">
         <div className="max-w-3xl">
           <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 mb-3">
