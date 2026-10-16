@@ -38,6 +38,15 @@ export const COUPONS: Record<string, Coupon> = {
     hidden: true,
     expiresAt: '2026-11-13T23:59:59Z',
   },
+  // Private customer-care code: 15% off for a specific customer (issued after an item-unavailable
+  // cancellation). One use, expires 30 days after issue (Nov 15 2026).
+  LISA15: {
+    type: 'percent',
+    value: 15,
+    description: '15% off your next order',
+    hidden: true,
+    expiresAt: '2026-11-15T23:59:59Z',
+  },
   // Ask first / reorder: 10% off, max $10. Autoship stays 7% off, max $10, unadvertised on checkout.
   RESTOCK5: {
     type: 'percent',
